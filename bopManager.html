@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>BOP Manager</title>
+    <!--
+        Author: Jonas Flohr
+        GitHub: flohrimohr
+    -->
+    <style>
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+        }
+
+        body {
+            background: #f5f5f5;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        p {
+            display: block;
+            margin-block: 1em;
+            margin-inline: 1em;
+            unicode-bidi: isolate;
+        }
+
+
+        header {
+            width: calc(100% - 48px);
+            padding: 24px;
+            padding-bottom: 0;
+            color: #222;
+            font-size: 2rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .logo {
+            width: auto;
+            height: 100px;
+        }
+
+        .card {
+            background: #fff;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+            border-radius: 12px;
+            margin: 20px 16px;
+            padding: 20px;
+            max-width: calc(100% - 72px);
+            max-height: calc(100% - 64px);
+            display: flex;
+            gap: 32px;
+        }
+
+        .card-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+
+        th,
+        td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+
+        td {
+            height: 36px;
+        }
+
+        th {
+            font-weight: 600;
+        }
+
+        thead {
+            border-bottom: 2px solid darkgray;
+        }
+
+        tbody {
+            tr:nth-child(even) {
+                background-color: #f7f7f7;
+            }
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .formElement {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        label {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .pointer,
+        .delete,
+        option {
+            cursor: pointer;
+        }
+
+        button {
+            background: #222;
+            color: #fff;
+            border: none;
+            transition: background 0.2s;
+
+            svg {
+                fill: #fff;
+            }
+        }
+
+        button:hover {
+            background: #444;
+        }
+
+        .checkBoxArea {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .actions {
+            width: 20px;
+        }
+
+        .formTable {
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 48px;
+        }
+
+        @media (min-width: 900px) {
+            .formTable {
+                flex-direction: row;
+            }
+        }
+
+        .snackbar {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #323232;
+            color: #fff;
+            text-align: center;
+            border-radius: 4px;
+            padding: 16px;
+            position: absolute;
+            bottom: 30px;
+            font-size: 17px;
+            transform: translateX(-50%);
+            z-index: 9999;
+            transition: visibility 0s, opacity 0.1s linear;
+            opacity: 0;
+            left: 50%;
+        }
+
+        .active {
+            background: #000000;
+            color: #fff;
+            border: none;
+        }
+
+        #tableViewBtn,
+        #editorViewBtn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background: #f3f3f3;
+            color: #000;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        #tableViewBtn.active,
+        #editorViewBtn.active {
+            background: #000000;
+            color: #fff;
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            
+        </div>
+        BOP Manager
+    </header>
+    <div style="height: 100%; display: flex; width: 100%;">
+        <div style="flex: 1;">
+            <div class="card" style="display: flex; flex-direction: column; gap: 32px; width: 100%;">
+                <div class="formTable">
+                    <div class="card-section" style="gap: 32px;">
+                        <div style="display: flex; gap: 32px; ">
+                            <button
+                                style="width: 100%; display: flex; align-items: center; gap: 8px; justify-content: center;"
+                                type="button" id="uploadBtn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#fff"
+                                    viewBox="0 0 24 24">
+                                    <path d="M12 16V4M12 4l-5 5M12 4l5 5" stroke="#fff" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                    <rect x="4" y="16" width="16" height="4" rx="2" fill="#fff" />
+                                </svg>
+                                Upload JSON
+                            </button>
+                            <button
+                                style="width: 100%; display: flex; align-items: center; gap: 8px; justify-content: center;"
+                                type="button" id="downloadBtn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#fff"
+                                    viewBox="0 0 24 24">
+                                    <path d="M12 8v12M12 20l-5-5M12 20l5-5" stroke="#fff" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                    <rect x="4" y="4" width="16" height="4" rx="2" fill="#fff" />
+                                </svg>
+                                Download JSON
+                            </button>
+                        </div>
+
+                        <input type="file" id="jsonFileInput" accept=".json" style="display:none;">
+
+
+                        <div style="display: flex; gap: 8px;">
+                            <button type="button" id="tableViewBtn" class="active">Table View</button>
+                            <button type="button" id="editorViewBtn">Text Editor</button>
+                        </div>
+                        <div id="tableEditorContainer">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Car</th>
+                                        <th>Weight (kg)</th>
+                                        <th>Restrictor (%)</th>
+                                        <th id="actions" name="actions" class="actions"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBody" name="tableBody">
+
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="textEditorContainer" style="display: none;">
+                            <textarea id="jsonTextEditor" name="jsonTextEditor"
+                                style="width: 100%; min-height: 200px; height: 300px; max-height: 50vh; resize: vertical; overflow: auto; cursor: pointer; font-family: monospace;"
+                                readonly></textarea>
+                        </div>
+                    </div>
+                    <div class="card-section">
+                        <form>
+                            <div class="formElement" style="position: relative;">
+                                <label for="trackSelect">Select Track:</label>
+                                <div style="position: relative;">
+                                    <select id="trackSelect" name="track" style="width: 100%; margin-top: 8px;">
+                                        <option value="">-- Choose a track --</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="checkBoxArea" name="groupCheckBoxes"></div>
+
+                            <div class="formElement">
+                                <label for="carSelect">Car:</label>
+                                <select id="carSelect" name="car" required>
+                                    <option value="">-- Choose a car --</option>
+                                </select>
+                            </div>
+
+                            <div class="formElement">
+                                <label for="weightInput">Weight (kg):</label>
+                                <input type="number" id="weightInput" name="weight" min="0" step="1" required>
+                            </div>
+
+                            <div class="formElement">
+                                <label for="restrictorInput">Restrictor (%):</label>
+                                <input type="number" id="restrictorInput" name="restrictor" min="0" step="1"
+                                    placeholder="0">
+                            </div>
+
+                            <button type="submit">Add BOP</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Snackbar -->
+    <div id="snackbar" class="snackbar"></div>
+    <footer>
+        <p>2025 BoP Manager <a href="https://github.com/flohrimohr/ACCBopManager/blob/main/LICENSE" target="_blank"
+                rel="noopener" style="color: royalblue; text-decoration: none;">GNU Licensed</a>.</p>
+    </footer>
+</body>
+<script>
+    // Helper functions
+    const $ = selector => document.querySelector(selector);
+    const $$ = selector => document.querySelectorAll(selector);
+
+    // icons
+    const icons = {
+        download: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20px" height="20px"><path d="M5,20h14c1.1,0,2-0.9,2-2v-4h-2v4H5v-4H3v4C3,19.1,3.9,20,5,20z M19,9h-4V3H9v6H5l7,7L19,9z"/></svg>`,
+        delete: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20px" height="20px"><path d="M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19V4Z"/></svg>`,
+    };
+
+    const groups = {
+        GT2: "GT2",
+        GT3: "GT3",
+        GT4: "GT4",
+        CS: "CS",
+        CUP: "CUP",
+    }
+
+    // tracks
+    let tracks = [
+        { name: "monza", pitBoxes: 29, slots: 60 },
+        { name: "zolder", pitBoxes: 34, slots: 50 },
+        { name: "brands_hatch", pitBoxes: 32, slots: 50 },
+        { name: "silverstone", pitBoxes: 36, slots: 60 },
+        { name: "paul_ricard", pitBoxes: 33, slots: 80 },
+        { name: "misano", pitBoxes: 30, slots: 50 },
+        { name: "spa", pitBoxes: 82, slots: 82 },
+        { name: "nurburgring", pitBoxes: 30, slots: 50 },
+        { name: "barcelona", pitBoxes: 29, slots: 50 },
+        { name: "hungaroring", pitBoxes: 27, slots: 50 },
+        { name: "zandvoort", pitBoxes: 25, slots: 50 },
+        { name: "kyalami", pitBoxes: 40, slots: 50 },
+        { name: "mount_panorama", pitBoxes: 36, slots: 50 },
+        { name: "suzuka", pitBoxes: 51, slots: 105 },
+        { name: "laguna_seca", pitBoxes: 30, slots: 50 },
+        { name: "imola", pitBoxes: 30, slots: 50 },
+        { name: "oulton_park", pitBoxes: 28, slots: 50 },
+        { name: "donington", pitBoxes: 37, slots: 50 },
+        { name: "snetterton", pitBoxes: 26, slots: 50 },
+        { name: "cota", pitBoxes: 30, slots: 70 },
+        { name: "indianapolis", pitBoxes: 30, slots: 60 },
+        { name: "watkins_glen", pitBoxes: 30, slots: 60 },
+        { name: "valencia", pitBoxes: 29, slots: 50 },
+        { name: "nurburgring_24h", pitBoxes: 50, slots: 110 }
+    ]
+
+    // enums
+    let carList = [
+        { id: 0, group: groups.GT3, name: "Porsche 991 GT3 R" },
+        { id: 1, group: groups.GT3, name: "Mercedes-AMG GT3" },
+        { id: 2, group: groups.GT3, name: "Ferrari 488 GT3" },
+        { id: 3, group: groups.GT3, name: "Audi R8 LMS" },
+        { id: 4, group: groups.GT3, name: "Lamborghini Huracan GT3" },
+        { id: 5, group: groups.GT3, name: "McLaren 650S GT3" },
+        { id: 6, group: groups.GT3, name: "Nissan GT-R Nismo GT3 2018" },
+        { id: 7, group: groups.GT3, name: "BMW M6 GT3" },
+        { id: 8, group: groups.GT3, name: "Bentley Continental GT3 2018" },
+        { id: 9, group: groups.CUP, name: "Porsche 991II GT3 Cup" },
+        { id: 10, group: groups.GT3, name: "Nissan GT-R Nismo GT3 2017" },
+        { id: 11, group: groups.GT3, name: "Bentley Continental GT3 2016" },
+        { id: 12, group: groups.GT3, name: "Aston Martin V12 Vantage GT3" },
+        { id: 13, group: groups.GT3, name: "Lamborghini Gallardo R-EX" },
+        { id: 14, group: groups.GT3, name: "Jaguar G3" },
+        { id: 15, group: groups.GT3, name: "Lexus RC F GT3" },
+        { id: 16, group: groups.GT3, name: "Lamborghini Huracan Evo (2019)" },
+        { id: 17, group: groups.GT3, name: "Honda NSX GT3" },
+        { id: 18, group: groups.CUP, name: "Lamborghini Huracan SuperTrofeo" },
+        { id: 19, group: groups.GT3, name: "Audi R8 LMS Evo (2019)" },
+        { id: 20, group: groups.GT3, name: "AMR V8 Vantage (2019)" },
+        { id: 21, group: groups.GT3, name: "Honda NSX Evo (2019)" },
+        { id: 22, group: groups.GT3, name: "McLaren 720S GT3 (2019)" },
+        { id: 23, group: groups.GT3, name: "Porsche 911II GT3 R (2019)" },
+        { id: 24, group: groups.GT3, name: "Ferrari 488 GT3 Evo 2020" },
+        { id: 25, group: groups.GT3, name: "Mercedes-AMG GT3 2020" },
+        { id: 26, group: groups.CUP, name: "Ferrari 488 Challenge Evo" },
+        { id: 27, group: groups.CS, name: "BMW M2 CS Racing" },
+        { id: 28, group: groups.CUP, name: "Porsche 911 GT3 Cup (Type 992)" },
+        { id: 29, group: groups.CUP, name: "Lamborghini Huracán Super Trofeo EVO2" },
+        { id: 30, group: groups.GT3, name: "BMW M4 GT3" },
+        { id: 31, group: groups.GT3, name: "Audi R8 LMS GT3 evo II" },
+        { id: 32, group: groups.GT3, name: "Ferrari 296 GT3" },
+        { id: 33, group: groups.GT3, name: "Lamborghini Huracan Evo2" },
+        { id: 34, group: groups.GT3, name: "Porsche 992 GT3 R" },
+        { id: 35, group: groups.GT3, name: "McLaren 720S GT3 Evo 2023" },
+        { id: 36, group: groups.GT3, name: "Ford Mustang GT3" },
+        { id: 50, group: groups.GT4, name: "Alpine A110 GT4" },
+        { id: 51, group: groups.GT4, name: "AMR V8 Vantage GT4" },
+        { id: 52, group: groups.GT4, name: "Audi R8 LMS GT4" },
+        { id: 53, group: groups.GT4, name: "BMW M4 GT4" },
+        { id: 55, group: groups.GT4, name: "Chevrolet Camaro GT4" },
+        { id: 56, group: groups.GT4, name: "Ginetta G55 GT4" },
+        { id: 57, group: groups.GT4, name: "KTM X-Bow GT4" },
+        { id: 58, group: groups.GT4, name: "Maserati MC GT4" },
+        { id: 59, group: groups.GT4, name: "McLaren 570S GT4" },
+        { id: 60, group: groups.GT4, name: "Mercedes-AMG GT4" },
+        { id: 61, group: groups.GT4, name: "Porsche 718 Cayman GT4" },
+        { id: 80, group: groups.GT2, name: "Audi R8 LMS GT2" },
+        { id: 82, group: groups.GT2, name: "KTM XBOW GT2" },
+        { id: 83, group: groups.GT2, name: "Maserati MC20 GT2" },
+        { id: 84, group: groups.GT2, name: "Mercedes AMG GT2" },
+        { id: 85, group: groups.GT2, name: "Porsche 911 GT2 RS CS Evo" },
+        { id: 86, group: groups.CUP, name: "Porsche 935" },
+    ];
+
+    // sort lists by name
+    carList.sort((a, b) => a.name.localeCompare(b.name));
+    tracks.sort((a, b) => a.name.localeCompare(b.name));
+
+    // readonly tracks and cars
+    const readonlyTracks = [...tracks];
+    const readonlyCars = [...carList];
+    Object.freeze(readonlyTracks);
+    Object.freeze(readonlyCars);
+
+    tracks.forEach(track => {
+        const option = document.createElement('option');
+        option.value = track.name;
+        option.textContent = track.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        $('select[name="track"]').appendChild(option);
+    });
+
+    carList.forEach(car => {
+        const option = document.createElement('option');
+        option.value = car.id;
+        option.textContent = car.name;
+        $('select[name="car"]').appendChild(option);
+    });
+
+    // add checkboxes for each car group into groupCheckBoxes div
+    const groupContainer = $('div[name="groupCheckBoxes"]');
+    Object.keys(groups).forEach(group => {
+        const label = document.createElement('label');
+        label.classList.add('pointer');
+        label.innerHTML = `<input type="checkbox" class="group-filter" value="${group}"> ${group}`;
+        groupContainer.appendChild(label);
+    });
+
+    // filter car select options based on checked groups
+    function filterCarsByGroup() {
+        // reset carList to original
+        carList = [...readonlyCars];
+
+        const checkedGroups = Array.from($$('.group-filter'))
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+
+        const carSelect = $('select[name="car"]');
+
+        // Remove all options except the first placeholder
+        while (carSelect.options.length > 1) {
+            carSelect.remove(1);
+        }
+
+        // Remove any selected car that is already in the table
+        const selectedCarsInTable = Array.from($('tbody[name="tableBody"]').children).map(row => {
+            const carName = row.children[0].textContent;
+            const carObj = readonlyCars.find(c => c.name === carName);
+            return carObj ? carObj.id : null;
+        });
+
+        selectedCarsInTable.forEach(carId => {
+            const index = readonlyCars.findIndex(c => c.id === carId);
+            if (index !== -1) {
+                carList.splice(index, 1);
+            }
+        });
+
+        // Add options back based on checked groups
+        carList.forEach(car => {
+            if (checkedGroups.length === 0 || checkedGroups.includes(car.group)) {
+                const option = document.createElement('option');
+                option.value = car.id;
+                option.textContent = car.name;
+                carSelect.appendChild(option);
+            }
+        });
+    }
+
+    // Listen for checkbox changes
+    $$('.group-filter').forEach(cb => {
+        cb.addEventListener('change', filterCarsByGroup);
+    });
+
+    // click event Add BOP button
+    document.querySelector('form button').addEventListener('click', e => {
+        e.preventDefault();
+        const carId = parseInt($('select[name="car"]').value);
+        const weight = parseInt($('input[name="weight"]').value);
+        let restrictor = parseFloat($('input[name="restrictor"]').value);
+
+        if (isNaN(carId) || isNaN(weight)) {
+            showSnackbar('Please fill in all fields correctly.');
+            return;
+        }
+
+        if (isNaN(restrictor)) {
+            restrictor = 0;
+        }
+
+        const carName = readonlyCars.find(c => c.id === carId).name;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${carName}</td>
+            <td>${weight}</td>
+            <td>${restrictor}</td>
+            <td name="delete" class="delete actions">${icons.delete}</td>
+        `;
+        $('tbody[name="tableBody"]').appendChild(row);
+
+        // Enable editing on double click for weight and restrictor
+        [1, 2].forEach(idx => {
+            row.children[idx].addEventListener('dblclick', function () {
+                const cell = this;
+                const oldValue = cell.textContent;
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.step = '1';
+                input.value = oldValue;
+                input.style.width = '60px';
+                cell.textContent = '';
+                cell.appendChild(input);
+                input.focus();
+
+                input.addEventListener('dblclick', e => {
+                    e.stopPropagation();
+                });
+
+                input.addEventListener('blur', () => {
+                    let newValue = input.value;
+                    if (idx === 1) {
+                        newValue = parseInt(newValue);
+                        if (isNaN(newValue)) newValue = oldValue;
+                    } else {
+                        newValue = parseFloat(newValue).toFixed(1);
+                        if (isNaN(newValue)) newValue = oldValue;
+                    }
+                    cell.textContent = newValue;
+                });
+
+                input.addEventListener('keydown', e => {
+                    if (e.key === 'Enter') input.blur();
+                    if (e.key === 'Escape') {
+                        cell.textContent = oldValue;
+                    }
+                });
+            });
+        });
+
+        // Add delete event
+        row.querySelector('.delete').addEventListener('click', () => {
+            // Add car back to select
+            const option = document.createElement('option');
+            option.value = carId;
+            option.textContent = carName;
+            // Insert in correct order
+            const carSelect = $('select[name="car"]');
+            let inserted = false;
+
+            // get selected groups
+            const checkedGroups = Array.from($$('.group-filter'))
+                .filter(cb => cb.checked)
+                .map(cb => cb.value);
+
+            // check if car group matches any checked group filters
+            const carGroup = readonlyCars.find(c => c.id === carId).group;
+            const matches = checkedGroups.some(group => carGroup === group);
+
+            if (checkedGroups.length > 0 && !matches) {
+                // do not add back to select if it doesn't match filter
+                row.remove();
+                return;
+            }
+
+            for (let i = 1; i < carSelect.options.length; i++) {
+                if (parseInt(carSelect.options[i].value) > carId) {
+                    carSelect.insertBefore(option, carSelect.options[i]);
+                    inserted = true;
+                    break;
+                }
+            }
+            if (!inserted) carSelect.appendChild(option);
+
+            // Remove row
+            row.remove();
+        });
+
+        // remove selected car from dropdown
+        const carOption = $(`select[name="car"] option[value="${carId}"]`);
+        if (carOption) carOption.remove();
+
+        // Clear inputs
+        $('select[name="car"]').value = '';
+        $('input[name="weight"]').value = '';
+        $('input[name="restrictor"]').value = '';
+    });
+
+    // download json file
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+        const trackName = $('select[name="track"]').value;
+        if (!trackName) {
+            showSnackbar('Please select a track first.');
+            return;
+        }
+
+        const rows = Array.from($('tbody[name="tableBody"]').children);
+        if (rows.length === 0) {
+            showSnackbar('No BOP entries to download.');
+            return;
+        }
+
+        const entries = rows.map(row => {
+            const cells = row.children;
+            const carName = cells[0].textContent;
+            const carObj = readonlyCars.find(c => c.name === carName);
+            const carModel = carObj ? carObj.id : null;
+            const ballastKg = parseInt(cells[1].textContent);
+            const restrictor = parseFloat(cells[2].textContent);
+
+            // Only include restrictor if it's not zero
+            const entry = {
+                track: trackName,
+                carModel: carModel,
+                ballastKg: ballastKg,
+                restrictor: restrictor
+            };
+            return entry;
+        });
+
+
+        const dataStr = JSON.stringify({ entries }, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${trackName}_bop.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+
+    function showSnackbar(message, duration = 3000) {
+        const snackbar = document.getElementById('snackbar');
+        snackbar.textContent = message;
+        snackbar.style.visibility = 'visible';
+        snackbar.style.opacity = '1';
+        clearTimeout(snackbar._timeout);
+        snackbar._timeout = setTimeout(() => {
+            snackbar.style.opacity = '0';
+            snackbar.style.visibility = 'hidden';
+        }, duration);
+    }
+
+    // upload json file
+    document.getElementById('uploadBtn').onclick = function () {
+        document.getElementById('jsonFileInput').click();
+    };
+    document.getElementById('jsonFileInput').onchange = function (event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                populateTable(data);
+                showSnackbar('BOP data loaded successfully.');
+            } catch (err) {
+                showSnackbar('Invalid JSON file.');
+            }
+        };
+        reader.readAsText(file);
+    };
+
+    function populateTable(data) {
+        if (!data.entries || !Array.isArray(data.entries)) {
+            showSnackbar('Invalid BOP data format.');
+            return;
+        }
+
+        const tableBody = $('tbody[name="tableBody"]');
+        tableBody.innerHTML = ''; // Clear existing entries
+
+        data.entries.forEach(entry => {
+            const carObj = readonlyCars.find(c => c.id === entry.carModel);
+            if (!carObj) return; // Skip unknown cars
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${carObj.name}</td>
+                <td>${entry.ballastKg}</td>
+                <td>${entry.restrictor !== undefined ? entry.restrictor : 0}</td>
+                <td name="delete" class="delete actions">${icons.delete}</td>
+            `;
+            tableBody.appendChild(row);
+
+            // Enable editing on double click for weight and restrictor
+            [1, 2].forEach(idx => {
+                row.children[idx].addEventListener('dblclick', function () {
+                    const cell = this;
+                    const oldValue = cell.textContent;
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.step = '1';
+                    input.value = oldValue;
+                    input.style.width = '60px';
+                    cell.textContent = '';
+                    cell.appendChild(input);
+                    input.focus();
+
+                    input.addEventListener('blur', () => {
+                        let newValue = input.value;
+                        if (idx === 1) {
+                            newValue = parseInt(newValue);
+                            if (isNaN(newValue)) newValue = oldValue;
+                        } else {
+                            newValue = parseFloat(newValue).toFixed(1);
+                            if (isNaN(newValue)) newValue = oldValue;
+                        }
+                        cell.textContent = newValue;
+                    });
+
+                    input.addEventListener('keydown', e => {
+                        if (e.key === 'Enter') input.blur();
+                        if (e.key === 'Escape') {
+                            cell.textContent = oldValue;
+                        }
+                    });
+                });
+            });
+
+            // Add delete event
+            row.querySelector('.delete').addEventListener('click', () => {
+                // Add car back to select
+                const option = document.createElement('option');
+                option.value = carObj.id;
+                option.textContent = carObj.name;
+                // Insert in correct order
+                const carSelect = $('select[name="car"]');
+                const existingOptions = Array.from(carSelect.options);
+                const insertIndex = existingOptions.findIndex(opt => opt.text.localeCompare(carObj.name) > 0);
+                if (insertIndex === -1) {
+                    carSelect.appendChild(option);
+                } else {
+                    carSelect.insertBefore(option, existingOptions[insertIndex]);
+                }
+                row.remove();
+            });
+        });
+
+        // select the track based on the first entry
+        if (data.entries.length > 0) {
+            const firstTrack = data.entries[0].track;
+            $('select[name="track"]').value = firstTrack;
+        }
+
+        // remove selected cars from dropdown
+        const selectedCarIds = data.entries.map(entry => entry.carModel);
+        selectedCarIds.forEach(carId => {
+            const carOption = $(`select[name="car"] option[value="${carId}"]`);
+            if (carOption) carOption.remove();
+        });
+    }
+
+    const tableViewBtn = document.getElementById('tableViewBtn');
+    const editorViewBtn = document.getElementById('editorViewBtn');
+    const tableEditorContainer = document.getElementById('tableEditorContainer');
+    const textEditorContainer = document.getElementById('textEditorContainer');
+
+    tableViewBtn.addEventListener('click', () => {
+        tableViewBtn.classList.add('active');
+        editorViewBtn.classList.remove('active');
+        tableEditorContainer.style.display = '';
+        textEditorContainer.style.display = 'none';
+    });
+
+    editorViewBtn.addEventListener('click', () => {
+        editorViewBtn.classList.add('active');
+        tableViewBtn.classList.remove('active');
+        tableEditorContainer.style.display = 'none';
+        textEditorContainer.style.display = '';
+    });
+
+    // if table content changes, update text editor
+    const tableBody = $('tbody[name="tableBody"]');
+    const jsonTextEditor = $('textarea[name="jsonTextEditor"]');
+
+    const updateJsonEditor = () => {
+        const json = tableToJson(tableBody);
+        jsonTextEditor.value = JSON.stringify(json, null, 2);
+    };
+
+    // Initial population of the JSON editor
+    updateJsonEditor();
+
+    // Observe changes in the table
+    const observer = new MutationObserver(updateJsonEditor);
+    observer.observe(tableBody, { childList: true, subtree: true });
+
+    // also update json editor if track selection changes
+    $('select[name="track"]').addEventListener('change', updateJsonEditor);
+
+    function tableToJson(tbody) {
+        const rows = Array.from(tbody.children);
+        const entries = rows.map(row => {
+            const cells = row.children;
+            const carName = cells[0].textContent;
+            const carObj = readonlyCars.find(c => c.name === carName);
+            const carModel = carObj ? carObj.id : null;
+            const ballastKg = parseInt(cells[1].textContent);
+            const restrictor = parseFloat(cells[2].textContent);
+
+            return {
+                track: $('select[name="track"]').value,
+                carModel: carModel,
+                ballastKg: ballastKg,
+                restrictor: restrictor
+            };
+        });
+        return { entries };
+    }
+
+    // copy text editor content to clipboard on click
+    document.getElementById('textEditorContainer').addEventListener('click', () => {
+        jsonTextEditor.select();
+        document.execCommand('copy');
+        showSnackbar('JSON copied to clipboard.');
+    });
+</script>
+
+</html>
