@@ -576,7 +576,6 @@
             });
         });
 
-        // Add delete event
         row.querySelector('.delete').addEventListener('click', () => {
             // Add car back to select
             const option = document.createElement('option');
@@ -811,7 +810,6 @@
         textEditorContainer.style.display = '';
     });
 
-    // if table content changes, update text editor
     const tableBody = $('tbody[name="tableBody"]');
     const jsonTextEditor = $('textarea[name="jsonTextEditor"]');
 
@@ -827,7 +825,6 @@
     const observer = new MutationObserver(updateJsonEditor);
     observer.observe(tableBody, { childList: true, subtree: true });
 
-    // also update json editor if track selection changes
     $('select[name="track"]').addEventListener('change', updateJsonEditor);
 
     function tableToJson(tbody) {
@@ -857,5 +854,6 @@
         showSnackbar('JSON copied to clipboard.');
     });
 </script>
+
 
 </html>
